@@ -37,3 +37,28 @@ test("nextShowMode cycles and wraps", () => {
 test("nextShowMode recovers from a value nobody recognises", () => {
   eq(Format.nextShowMode("nonsense"), "both")
 })
+
+test("uptime says days and hours once a machine has been up that long", () => {
+  eq(Format.uptime(345678), "4d 00h")
+  eq(Format.uptime(4 * 86400 + 2 * 3600 + 660), "4d 02h")
+})
+
+test("uptime drops to hours and minutes within a day", () => {
+  eq(Format.uptime(3 * 3600 + 21 * 60), "3h 21m")
+})
+
+test("uptime drops to minutes within an hour", () => {
+  eq(Format.uptime(12 * 60 + 40), "12m")
+})
+
+test("uptime is empty rather than wrong when there is no reading", () => {
+  eq(Format.uptime(null), "")
+})
+
+test("load joins the three averages the way uptime(1) prints them", () => {
+  eq(Format.load([1.2, 0.9, 0.7]), "1.20  0.90  0.70")
+})
+
+test("load is empty rather than wrong when there is no reading", () => {
+  eq(Format.load(null), "")
+})

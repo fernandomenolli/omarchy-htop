@@ -59,3 +59,66 @@ test("parseMemory returns null without MemAvailable", () => {
 test("parseMemory returns null on empty input", () => {
   eq(Proc.parseMemory(""), null)
 })
+
+// One line per process: pid, utime+stime in jiffies, RSS in pages, then the
+// command name last so a name with a space in it cannot break the split.
+const PROCESSES = [
+  "1 4210 3312 systemd",
+  "1046 0 0 kworker/21:1H-kblockd",
+  "286275 91544 148902 ruby",
+  "211194 250310 512044 chromium",
+  "512 33 900 Web Content",
+].join("\n")
+
+test("parseProcesses keys by pid and keeps a name with a space in it", () => {
+  eq(Proc.parseProcesses(PROCESSES)["512"], { ticks: 33, rssPages: 900, name: "Web Content" })
+})
+
+test("parseProcesses skips a line it cannot read", () => {
+  eq(Proc.parseProcesses("garbage\n7 12 40 bash"), { "7": { ticks: 12, rssPages: 40, name: "bash" } })
+})
+
+test("topProcesses ranks by the jiffies each process burned since last time", () => {
+  const previous = Proc.parseProcesses(PROCESSES)
+  const current = Proc.parseProcesses([
+    "1 4210 3312 systemd",
+    "286275 91644 148902 ruby",
+    "211194 250330 512044 chromium",
+  ].join("\n"))
+
+  eq(Proc.topProcesses(previous, current, 4000, 2), [
+    { name: "ruby", percent: 2.5 },
+    { name: "chromium", percent: 0.5 },
+  ])
+})
+
+test("topProcesses ignores a process that burned nothing", () => {
+  const sample = Proc.parseProcesses("7 12 40 bash")
+  eq(Proc.topProcesses(sample, sample, 4000, 5), [])
+})
+
+test("topProcesses has nothing to rank on the first sample", () => {
+  eq(Proc.topProcesses(null, Proc.parseProcesses(PROCESSES), 4000, 5), [])
+})
+
+test("topProcesses skips a process that was not there last time", () => {
+  const previous = Proc.parseProcesses("7 12 40 bash")
+  const current = Proc.parseProcesses("7 12 40 bash\n9 300 40 htop")
+  eq(Proc.topProcesses(previous, current, 4000, 5), [])
+})
+
+test("parseLoadavg takes the three averages", () => {
+  eq(Proc.parseLoadavg("1.20 0.90 0.70 2/1234 56789"), [1.2, 0.9, 0.7])
+})
+
+test("parseLoadavg returns null on nonsense", () => {
+  eq(Proc.parseLoadavg("nope"), null)
+})
+
+test("parseUptime takes the seconds the machine has been up", () => {
+  eq(Proc.parseUptime("345678.90 8123456.78"), 345678.9)
+})
+
+test("parseUptime returns null on nonsense", () => {
+  eq(Proc.parseUptime(""), null)
+})
