@@ -122,3 +122,43 @@ test("parseUptime takes the seconds the machine has been up", () => {
 test("parseUptime returns null on nonsense", () => {
   eq(Proc.parseUptime(""), null)
 })
+
+test("parseProcesses ignores the /proc/stat header the scan carries with it", () => {
+  const scan = "cpu  909912 785 115028 31657426 9424 24196 14497 0 0 0\n7 12 40 bash"
+  eq(Proc.parseProcesses(scan), { "7": { ticks: 12, rssPages: 40, name: "bash" } })
+  eq(Proc.parseCpu(scan), { total: 32731268, idle: 31666850 })
+})
+
+test("coreCount counts the per-core lines /proc/stat carries", () => {
+  eq(Proc.coreCount(STAT), 1)
+  eq(Proc.coreCount("cpu  1 2 3 4 5\ncpu0 1\ncpu1 1\ncpu2 1\nintr 9"), 3)
+})
+
+test("coreCount returns null when there are no per-core lines", () => {
+  eq(Proc.coreCount("cpu  1 2 3 4 5\nintr 9"), null)
+})
+
+test("topMemory ranks by resident pages and needs no previous sample", () => {
+  const current = Proc.parseProcesses(PROCESSES)
+  eq(Proc.topMemory(current, 4096, 2), [
+    { name: "chromium", bytes: 2097332224 },
+    { name: "ruby", bytes: 609902592 },
+  ])
+})
+
+test("topMemory leaves out the kernel threads, which hold no pages", () => {
+  eq(Proc.topMemory(Proc.parseProcesses("1046 0 0 kworker/21:1H"), 4096, 5), [])
+})
+
+test("topMemory has nothing to rank without a sample", () => {
+  eq(Proc.topMemory(null, 4096, 5), [])
+})
+
+test("parsePageSize takes the size the scan reported", () => {
+  eq(Proc.parsePageSize("4096\ncpu  1 2 3 4 5\n7 12 40 bash"), 4096)
+  eq(Proc.parsePageSize("16384\n"), 16384)
+})
+
+test("parsePageSize returns null when the scan did not report one", () => {
+  eq(Proc.parsePageSize("cpu  1 2 3 4 5"), null)
+})

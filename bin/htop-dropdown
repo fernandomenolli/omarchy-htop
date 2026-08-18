@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Toggles a quake-style htop window on the focused monitor.
 #
-#   htop-dropdown toggle [widthPercent] [heightPercent]
+#   htop-dropdown toggle [widthPercent] [heightPercent] [anchorCenterX]
 #
 # The window lives in Hyprland's `special:htop` workspace: it is spawned once
 # and hidden thereafter, so the second open is instant and htop keeps its sort
@@ -20,6 +20,10 @@ SEED_HTOPRC="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)/htoprc"
 
 WIDTH_PERCENT="${2:-60}"
 HEIGHT_PERCENT="${3:-55}"
+# Where the bar widget sits, so the window drops from under the thing that was
+# clicked. Anything else, including -1 from a caller with no bar to point at,
+# centres it.
+ANCHOR_CENTER_X="${4:--1}"
 
 for tool in htop hyprctl jq; do
   command -v "$tool" >/dev/null || { echo "htop-dropdown: $tool is not installed" >&2; exit 1; }
@@ -58,7 +62,12 @@ place() {
 
   width=$(jq -n --argjson m "$monitor" --argjson p "$WIDTH_PERCENT" '($m.width / $m.scale * $p / 100) | floor')
   height=$(jq -n --argjson m "$monitor" --argjson p "$HEIGHT_PERCENT" '($m.height / $m.scale * $p / 100) | floor')
-  x=$(jq -n --argjson m "$monitor" --argjson w "$width" '($m.x + ($m.width / $m.scale - $w) / 2) | floor')
+  x=$(jq -n --argjson m "$monitor" --argjson w "$width" --argjson a "$ANCHOR_CENTER_X" --argjson g "$GAP" '
+    ($m.width / $m.scale) as $mw
+    | (if $a >= 0 then $a - $w / 2 else ($mw - $w) / 2 end)
+    | [., $mw - $w - $g] | min
+    | [., $g] | max
+    | ($m.x + .) | floor')
   y=$(jq -n --argjson m "$monitor" --argjson g "$GAP" '($m.y + $m.reserved[1] + $g) | floor')
 
   # Resize first: Hyprland recentres a floating window as it resizes, so
@@ -87,5 +96,5 @@ toggle() {
 
 case "${1:-toggle}" in
   toggle) toggle ;;
-  *) echo "usage: htop-dropdown toggle [widthPercent] [heightPercent]" >&2; exit 2 ;;
+  *) echo "usage: htop-dropdown toggle [widthPercent] [heightPercent] [anchorCenterX]" >&2; exit 2 ;;
 esac

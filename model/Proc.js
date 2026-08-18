@@ -97,3 +97,32 @@ function parseUptime(text) {
   var seconds = Number(first)
   return isNaN(seconds) ? null : seconds
 }
+
+function coreCount(text) {
+  var lines = String(text || "").split("\n").filter(function(line) {
+    return /^cpu\d+ /.test(line)
+  })
+  return lines.length > 0 ? lines.length : null
+}
+
+function topMemory(current, pageSize, limit) {
+  if (!current || !pageSize) return []
+
+  var ranked = []
+  for (var pid in current) {
+    // Kernel threads hold no pages, which is also how they leave this list.
+    if (current[pid].rssPages <= 0) continue
+    ranked.push({ name: current[pid].name, bytes: current[pid].rssPages * pageSize })
+  }
+
+  ranked.sort(function(a, b) { return b.bytes - a.bytes })
+  return ranked.slice(0, limit)
+}
+
+// The scan reports the page size rather than assuming 4 KiB, because aarch64
+// runs 16 KiB pages and the whole memory column would be a quarter of the
+// truth there.
+function parsePageSize(text) {
+  var first = String(text || "").split("\n")[0].trim()
+  return /^\d+$/.test(first) ? Number(first) : null
+}

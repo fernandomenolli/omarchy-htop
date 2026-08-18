@@ -6,13 +6,15 @@
   "author": "Fernando Menolli",
   "license": "MIT",
   "description": "Live CPU and memory in the bar, and the real htop one click away.",
-  "kinds": ["bar-widget"],
+  "kinds": [
+    "bar-widget"
+  ],
   "entryPoints": {
-    "barWidget": "BarWidget.qml"
+    "barWidget": "Panel.qml"
   },
   "barWidget": {
     "displayName": "htop",
-    "description": "CPU and memory read straight from /proc, with htop dropping down from under the bar on click.",
+    "description": "CPU and memory read straight from /proc, with the top processes and the real htop one click away.",
     "category": "System",
     "allowMultiple": false,
     "defaultSection": "right",
@@ -21,7 +23,8 @@
       "show": "both",
       "urgentThreshold": 85,
       "dropdownWidthPercent": 60,
-      "dropdownHeightPercent": 55
+      "dropdownHeightPercent": 55,
+      "processLimit": 4
     },
     "schema": [
       {
@@ -37,7 +40,11 @@
         "key": "show",
         "type": "enum",
         "label": "Show in the bar",
-        "options": ["both", "cpu", "memory"],
+        "options": [
+          "both",
+          "cpu",
+          "memory"
+        ],
         "defaultValue": "both",
         "description": "Right-clicking the widget cycles this too."
       },
@@ -49,6 +56,15 @@
         "max": 100,
         "step": 5,
         "defaultValue": 85
+      },
+      {
+        "key": "processLimit",
+        "type": "integer",
+        "label": "Rows per process list",
+        "min": 3,
+        "max": 8,
+        "step": 1,
+        "defaultValue": 4
       },
       {
         "key": "dropdownWidthPercent",
