@@ -1,7 +1,7 @@
 # htop for Omarchy
 
 Live CPU and memory in the bar. Click it for the panel that answers what is
-eating this machine right now — and a button that opens the real htop in a
+eating this machine right now, and a button that opens the real htop in a
 terminal window.
 
 ![The meters in the bar, and the panel that opens from them.](docs/panel.png)
@@ -27,7 +27,7 @@ omarchy plugin remove io.github.fernandomenolli.htop
 ```
 
 That takes the plugin out of the bar and deletes its directory. Your htop
-config is left behind on purpose — delete it yourself if you want it gone:
+config is left behind on purpose. Delete it yourself if you want it gone:
 
 ```bash
 rm -rf ~/.local/state/omarchy/plugins/io.github.fernandomenolli.htop
@@ -47,8 +47,8 @@ The plugin writes nowhere else. Your `hyprland.conf`, `shell.json` and
 | left | open the panel |
 | right | cycle what the bar shows: both → CPU → memory |
 
-Inside the panel, **Open htop** opens htop in a terminal window — an ordinary
-Hyprland window you tile, move and close like any other. Press it again with
+Inside the panel, **Open htop** opens htop in a terminal window. It is an
+ordinary Hyprland window you tile, move and close like any other. Press it again with
 htop already running and it focuses that window instead of opening a second
 one.
 
@@ -75,19 +75,20 @@ Under Setup > Plugins.
 
 ## What it costs
 
-Measured on the machine this was built on — AMD, 24 cores, Omarchy 4.0.0.alpha,
-Hyprland 0.56.2 — by reading `utime + stime` from `/proc/<pid>/stat` for the
-`omarchy-shell` process, with the plugin enabled and then disabled. The numbers
-below are the difference. You can repeat it: the method is four lines of shell.
+Measured on the machine this was built on, an AMD box with 24 cores running
+Omarchy 4.0.0.alpha and Hyprland 0.56.2. The method is to read `utime + stime`
+from `/proc/<pid>/stat` for the `omarchy-shell` process, with the plugin
+enabled and then disabled, and take the difference. You can repeat it in four
+lines of shell.
 
 | | Shell alone | With this plugin |
 |---|---|---|
-| Idle, 30 seconds | 10 ms of CPU | 30 ms — the only one of these that ticks at rest |
+| Idle, 30 seconds | 10 ms of CPU | 30 ms, the only one of these that ticks at rest |
 | 300 focus switches | 840 ms | 890 ms |
 | Memory | ~500 MB | no measurable change |
 
-The shell's own cost dominates everything here: **2.8 ms of that per focus
-switch is Omarchy itself** — the bar redrawing, the active-window widget, the
+The shell's own cost dominates everything here. **2.8 ms of that per focus
+switch is Omarchy itself**: the bar redrawing, the active-window widget, the
 workspace indicators. All five of these plugins together add 0.17 ms on top.
 
 **It does not get heavier as it runs.** The two `/proc` reads cost the same on the first tick and the ten-thousandth; there is nothing accumulated to re-read.
@@ -95,8 +96,8 @@ workspace indicators. All five of these plugins together add 0.17 ms on top.
 
 ## Your htoprc is yours
 
-On first open the plugin seeds a curated `htoprc` — two 50/50 columns,
-kernel threads hidden, sorted by CPU — to:
+On first open the plugin seeds a curated `htoprc`, with two 50/50 columns,
+kernel threads hidden and sorted by CPU, to:
 
 ```
 ~/.local/state/omarchy/plugins/io.github.fernandomenolli.htop/htoprc
@@ -114,8 +115,8 @@ switch on its own.
 node tests/run.js
 ```
 
-No dependencies and no framework. They cover `model/` — the `/proc` parsing
-and the formatting, which is the half that runs without a QML engine.
+No dependencies and no framework. They cover `model/`, which is the `/proc`
+parsing and the formatting: the half that runs without a QML engine.
 
 ## Licence
 
