@@ -39,3 +39,23 @@ test("cpuPercent does not divide by zero when the counters did not advance", () 
 test("cpuPercent clamps a counter reset rather than reporting a negative", () => {
   eq(Proc.cpuPercent({ total: 5000, idle: 4000 }, { total: 1200, idle: 1050 }), null)
 })
+
+const MEMINFO = [
+  "MemTotal:       31965652 kB",
+  "MemFree:         1203552 kB",
+  "MemAvailable:   22967448 kB",
+  "Buffers:            2456 kB",
+  "Cached:         23332500 kB",
+].join("\n")
+
+test("parseMemory counts what is unavailable, not what is unfree", () => {
+  eq(Proc.parseMemory(MEMINFO), { usedKb: 8998204, totalKb: 31965652 })
+})
+
+test("parseMemory returns null without MemAvailable", () => {
+  eq(Proc.parseMemory("MemTotal: 31965652 kB\nMemFree: 1203552 kB"), null)
+})
+
+test("parseMemory returns null on empty input", () => {
+  eq(Proc.parseMemory(""), null)
+})
