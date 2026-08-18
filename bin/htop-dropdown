@@ -49,7 +49,7 @@ focused_monitor() {
 
 spawn() {
   seed_htoprc
-  dispatch "hl.dsp.exec_cmd(\"[float; workspace special:$WORKSPACE silent] env HTOPRC=$STATE_DIR/htoprc uwsm-app -- xdg-terminal-exec --app-id=$APP_ID -e htop\")"
+  dispatch "hl.dsp.exec_cmd(\"[float; workspace special:$WORKSPACE silent; opacity 1.0 override] env HTOPRC=$STATE_DIR/htoprc uwsm-app -- xdg-terminal-exec --app-id=$APP_ID -e htop\")"
 }
 
 # Places the window under the bar on whichever monitor has focus: `reserved[1]`
@@ -82,15 +82,19 @@ toggle() {
 
   if [[ -z "$address" ]]; then
     spawn
-    for _ in {1..40}; do
+    # A cold terminal can take a couple of seconds to map. Waiting only long
+    # enough for a warm one left the window parked in the hidden workspace,
+    # spawned but never shown.
+    for _ in {1..120}; do
       address="$(client_address)"
       [[ -n "$address" ]] && break
       sleep 0.05
     done
-    [[ -n "$address" ]] || { echo "htop-dropdown: the terminal never appeared" >&2; exit 1; }
   fi
 
-  place "$address"
+  # Placement needs the address; being shown does not. A terminal slower than
+  # the wait still drops down, just wherever Hyprland first put it.
+  [[ -n "$address" ]] && place "$address"
   dispatch "hl.dsp.workspace.toggle_special(\"$WORKSPACE\")"
 }
 
