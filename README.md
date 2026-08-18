@@ -68,15 +68,23 @@ Under Setup > Plugins.
 
 ## What it costs
 
-Closed, the widget reads `/proc/stat` and `/proc/meminfo` — two files, no
-subprocess — and burned no measurable CPU over 40 seconds on the machine it
-was built on. Load, uptime and the process lists are only sampled while the
-panel is open, and the process scan is a single `awk` pass over
-`/proc/<pid>/stat` (8 ms for 529 processes) rather than a `ps` whose `%CPU`
-is an average over each process's whole life.
+Measured on the machine this was built on — AMD, 24 cores, Omarchy 4.0.0.alpha,
+Hyprland 0.56.2 — by reading `utime + stime` from `/proc/<pid>/stat` for the
+`omarchy-shell` process, with the plugin enabled and then disabled. The numbers
+below are the difference. You can repeat it: the method is four lines of shell.
 
-The reason it is this cheap is that an Omarchy plugin is QML loaded into the
-shell process that is already running. Nothing here is a daemon.
+| | Shell alone | With this plugin |
+|---|---|---|
+| Idle, 30 seconds | 10 ms of CPU | 30 ms — the only one of these that ticks at rest |
+| 300 focus switches | 840 ms | 890 ms |
+| Memory | ~500 MB | no measurable change |
+
+The shell's own cost dominates everything here: **2.8 ms of that per focus
+switch is Omarchy itself** — the bar redrawing, the active-window widget, the
+workspace indicators. All five of these plugins together add 0.17 ms on top.
+
+**It does not get heavier as it runs.** The two `/proc` reads cost the same on the first tick and the ten-thousandth; there is nothing accumulated to re-read.
+
 
 ## Your htoprc is yours
 
