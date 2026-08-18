@@ -14,7 +14,7 @@
   },
   "barWidget": {
     "displayName": "htop",
-    "description": "CPU and memory read straight from /proc, with the top processes and the real htop one click away.",
+    "description": "CPU and memory read straight from /proc, with the top processes and htop one click away.",
     "category": "System",
     "allowMultiple": false,
     "defaultSection": "right",
@@ -22,8 +22,6 @@
       "refreshIntervalMs": 2000,
       "show": "both",
       "urgentThreshold": 85,
-      "dropdownWidthPercent": 60,
-      "dropdownHeightPercent": 55,
       "processLimit": 4
     },
     "schema": [
@@ -65,24 +63,6 @@
         "max": 8,
         "step": 1,
         "defaultValue": 4
-      },
-      {
-        "key": "dropdownWidthPercent",
-        "type": "integer",
-        "label": "Dropdown width (% of screen)",
-        "min": 30,
-        "max": 100,
-        "step": 5,
-        "defaultValue": 60
-      },
-      {
-        "key": "dropdownHeightPercent",
-        "type": "integer",
-        "label": "Dropdown height (% of screen)",
-        "min": 25,
-        "max": 95,
-        "step": 5,
-        "defaultValue": 55
       }
     ]
   }

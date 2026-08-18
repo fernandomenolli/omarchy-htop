@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Io
 import qs.Commons
 import qs.Ui
@@ -9,7 +8,8 @@ import "model/Format.js" as Format
 
 // Two meters in the bar, and a panel that answers the question that makes
 // anyone open a system monitor: what is eating this machine right now. The
-// full htop is one button away rather than the first thing you get.
+// full htop is one button away rather than the first thing you get, and it
+// opens as an ordinary window you manage like any other.
 Panel {
   id: root
   moduleName: "io.github.fernandomenolli.htop"
@@ -19,8 +19,6 @@ Panel {
   readonly property string showMode: setting("show", "both")
   readonly property int urgentThreshold: setting("urgentThreshold", 85)
   readonly property int processLimit: setting("processLimit", 4)
-  readonly property int dropdownWidthPercent: setting("dropdownWidthPercent", 60)
-  readonly property int dropdownHeightPercent: setting("dropdownHeightPercent", 55)
 
   readonly property bool showCpu: showMode !== "memory"
   readonly property bool showMemory: showMode !== "cpu"
@@ -32,30 +30,16 @@ Panel {
   readonly property bool cpuUrgent: monitor.cpuPercent !== null && monitor.cpuPercent >= urgentThreshold
   readonly property bool memoryUrgent: monitor.memPercent !== null && monitor.memPercent >= urgentThreshold
   readonly property string reading: Format.tooltip(monitor.cpuPercent, monitor.memory)
-  readonly property string scriptPath: Qt.resolvedUrl("bin/htop-dropdown").toString().replace("file://", "")
-
-  // Hyprland announces which special workspace a monitor is showing, and an
-  // empty name means none. Listening beats asking: the button is right the
-  // moment the window appears, whoever opened it.
-  property bool htopShown: false
-
-  // Where the widget sits on the bar, so htop drops from under it rather than
-  // from the middle of the screen. -1 leaves the placement to the script.
-  readonly property real anchorCenterX: {
-    anchorWatcher.transform
-    var window = group.QsWindow.window
-    if (!window) return -1
-    return group.mapToItem(window.contentItem, 0, 0).x + group.width / 2
-  }
+  readonly property string scriptPath: Qt.resolvedUrl("bin/htop-window").toString().replace("file://", "")
 
   implicitWidth: group.implicitWidth
   implicitHeight: group.implicitHeight
 
-  function toggleHtop() {
-    if (!htopShown) close()
-    Quickshell.execDetached([scriptPath, "toggle",
-                             String(dropdownWidthPercent), String(dropdownHeightPercent),
-                             String(Math.round(anchorCenterX))])
+  // Focuses the window when one is already open, which is what makes a second
+  // click do the obvious thing rather than pile up terminals.
+  function openHtop() {
+    close()
+    Quickshell.execDetached([scriptPath])
   }
 
   // Written back to shell.json the way the clock writes its cycled format, so
@@ -69,22 +53,6 @@ Panel {
     root.settings = entry
     if (root.bar && root.bar.shell && typeof root.bar.shell.updateEntryInline === "function")
       root.bar.shell.updateEntryInline(root.moduleName, entry)
-  }
-
-  // mapToItem is a one-shot; this is what makes the anchor binding re-evaluate
-  // when the bar lays its widgets out again.
-  TransformWatcher {
-    id: anchorWatcher
-    a: group.QsWindow.window ? group.QsWindow.window.contentItem : null
-    b: group
-  }
-
-  Connections {
-    target: Hyprland
-    function onRawEvent(event) {
-      if (!event || String(event.name) !== "activespecial") return
-      root.htopShown = String(event.data).indexOf("special:htop") === 0
-    }
   }
 
   SystemMonitor {
@@ -143,7 +111,7 @@ Panel {
       id: keyCatcher
       anchors.fill: parent
       onCloseRequested: root.close()
-      onActivateRequested: root.toggleHtop()
+      onActivateRequested: root.openHtop()
       onTabRequested: function(direction) { root.switchPanel(direction) }
 
       Flickable {
@@ -223,12 +191,12 @@ Panel {
 
           Button {
             width: parent.width
-            text: root.htopShown ? "Close htop" : "Open htop"
-            iconText: root.htopShown ? "󰅖" : "󰆍"
+            text: "Open htop"
+            iconText: "󰆍"
             bordered: true
             foreground: root.foreground
             fontFamily: root.fontFamily
-            onClicked: root.toggleHtop()
+            onClicked: root.openHtop()
           }
         }
       }

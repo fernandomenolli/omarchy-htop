@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Opens htop in a terminal window, or focuses the one already open.
+#
+#   htop-window
+#
+# A plain Hyprland window, managed like any other. The only thing this adds
+# over running htop yourself is the seeded config and a stable app-id, so a
+# second click finds the window instead of opening another one.
+
+set -euo pipefail
+
+APP_ID="org.omarchy.htop"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/plugins/io.github.fernandomenolli.htop"
+SEED_HTOPRC="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)/htoprc"
+
+command -v htop >/dev/null || { echo "htop-window: htop is not installed" >&2; exit 1; }
+
+mkdir -p "$STATE_DIR"
+[[ -f "$STATE_DIR/htoprc" ]] || cp "$SEED_HTOPRC" "$STATE_DIR/htoprc"
+export HTOPRC="$STATE_DIR/htoprc"
+
+exec omarchy-launch-or-focus-tui --app-id="$APP_ID" htop

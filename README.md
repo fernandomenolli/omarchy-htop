@@ -1,8 +1,8 @@
 # htop for Omarchy
 
 Live CPU and memory in the bar. Click it for the panel that answers what is
-eating this machine right now — and a button that drops the real htop down
-from under the widget.
+eating this machine right now — and a button that opens the real htop in a
+terminal window.
 
 The catalogue has four native process monitors and two plugins that launch
 btop. This is the one that fronts htop, and it does not reimplement it.
@@ -13,7 +13,7 @@ btop. This is the one that fronts htop, and it does not reimplement it.
 omarchy plugin add https://github.com/fernandomenolli/omarchy-htop.git --enable
 ```
 
-Needs `htop`, `jq`, Hyprland 0.56+ and Omarchy 4.
+Needs `htop` and Omarchy 4.
 
 ## What the clicks do
 
@@ -22,10 +22,10 @@ Needs `htop`, `jq`, Hyprland 0.56+ and Omarchy 4.
 | left | open the panel |
 | right | cycle what the bar shows: both → CPU → memory |
 
-Inside the panel: **Open htop** drops the full htop from under the widget,
-into Hyprland's `special:htop` workspace. It is spawned once and hidden
-after that, so the second open is instant and htop keeps its sort column,
-filter and tree mode. While it is showing, the button reads **Close htop**.
+Inside the panel, **Open htop** opens htop in a terminal window — an ordinary
+Hyprland window you tile, move and close like any other. Press it again with
+htop already running and it focuses that window instead of opening a second
+one.
 
 ## Bind it to a key
 
@@ -47,8 +47,6 @@ Under Setup > Plugins.
 | Show in the bar | both | both, CPU only, or memory only |
 | Urgent above | 85% | where a meter turns the theme's urgent colour |
 | Rows per process list | 4 | length of the two lists in the panel |
-| Dropdown width | 60% | htop window width, as a share of the screen |
-| Dropdown height | 55% | htop window height |
 
 ## What it costs
 
