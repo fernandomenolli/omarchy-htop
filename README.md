@@ -1,5 +1,7 @@
 # htop for Omarchy
 
+![The bar meters and the panel](preview.png)
+
 Live CPU and memory in the bar. Click it for the panel that answers what is
 eating this machine right now — and a button that opens the real htop in a
 terminal window.
@@ -14,6 +16,22 @@ omarchy plugin add https://github.com/fernandomenolli/omarchy-htop.git --enable
 ```
 
 Needs `htop` and Omarchy 4.
+
+## Remove
+
+```bash
+omarchy plugin remove io.github.fernandomenolli.htop
+```
+
+That takes the plugin out of the bar and deletes its directory. Your htop
+config is left behind on purpose — delete it yourself if you want it gone:
+
+```bash
+rm -rf ~/.local/state/omarchy/plugins/io.github.fernandomenolli.htop
+```
+
+The plugin writes nowhere else. Your `hyprland.conf`, `shell.json` and
+`~/.config/htop/` are never touched.
 
 ## What the clicks do
 
