@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.fernandomenolli.htop",
+  "name": "htop",
+  "version": "0.1.0",
+  "author": "Fernando Menolli",
+  "license": "MIT",
+  "description": "Live CPU and memory in the bar, and the real htop one click away.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "htop",
+    "description": "CPU and memory read straight from /proc, with htop dropping down from under the bar on click.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "refreshIntervalMs": 2000,
+      "show": "both",
+      "urgentThreshold": 85,
+      "dropdownWidthPercent": 60,
+      "dropdownHeightPercent": 55
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalMs",
+        "type": "integer",
+        "label": "Refresh interval (ms)",
+        "min": 500,
+        "max": 10000,
+        "step": 250,
+        "defaultValue": 2000
+      },
+      {
+        "key": "show",
+        "type": "enum",
+        "label": "Show in the bar",
+        "options": ["both", "cpu", "memory"],
+        "defaultValue": "both",
+        "description": "Right-clicking the widget cycles this too."
+      },
+      {
+        "key": "urgentThreshold",
+        "type": "integer",
+        "label": "Urgent above (%)",
+        "min": 50,
+        "max": 100,
+        "step": 5,
+        "defaultValue": 85
+      },
+      {
+        "key": "dropdownWidthPercent",
+        "type": "integer",
+        "label": "Dropdown width (% of screen)",
+        "min": 30,
+        "max": 100,
+        "step": 5,
+        "defaultValue": 60
+      },
+      {
+        "key": "dropdownHeightPercent",
+        "type": "integer",
+        "label": "Dropdown height (% of screen)",
+        "min": 25,
+        "max": 95,
+        "step": 5,
+        "defaultValue": 55
+      }
+    ]
+  }
+}
