@@ -1,0 +1,30 @@
+# Seeded by the Omarchy htop plugin. Yours to edit — htop rewrites this file
+# when it exits, and the plugin never overwrites it once it exists.
+htop_version=3.5.2
+config_reader_min_version=3
+fields=0 48 17 18 38 39 40 2 46 47 49 1
+hide_kernel_threads=1
+hide_userland_threads=1
+hide_running_in_container=0
+shadow_other_users=0
+show_thread_names=0
+show_program_path=0
+highlight_base_name=1
+highlight_deleted_exe=1
+highlight_megabytes=1
+highlight_threads=1
+highlight_changes=0
+find_comm_in_cmdline=1
+strip_exe_from_cmdline=1
+show_merged_command=0
+tree_view=0
+sort_key=46
+sort_direction=-1
+header_layout=two_50_50
+column_meters_0=AllCPUs2 Memory Swap
+column_meter_modes_0=1 1 1
+column_meters_1=Tasks LoadAverage Uptime
+column_meter_modes_1=2 2 2
+color_scheme=0
+enable_mouse=1
+delay=15

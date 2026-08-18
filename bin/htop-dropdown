@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# Toggles a quake-style htop window on the focused monitor.
+#
+#   htop-dropdown toggle [widthPercent] [heightPercent]
+#
+# The window lives in Hyprland's `special:htop` workspace: it is spawned once
+# and hidden thereafter, so the second open is instant and htop keeps its sort
+# column, filter and tree mode between openings.
+#
+# Hyprland 0.56 evaluates `hyprctl dispatch` arguments as Lua, so every call
+# here goes through `hl.dsp.*` rather than the old positional dispatchers.
+
+set -euo pipefail
+
+APP_ID="org.omarchy.htop"
+WORKSPACE="htop"
+GAP=8
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/plugins/io.github.fernandomenolli.htop"
+SEED_HTOPRC="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)/htoprc"
+
+WIDTH_PERCENT="${2:-60}"
+HEIGHT_PERCENT="${3:-55}"
+
+for tool in htop hyprctl jq; do
+  command -v "$tool" >/dev/null || { echo "htop-dropdown: $tool is not installed" >&2; exit 1; }
+done
+
+dispatch() {
+  hyprctl dispatch "$1" >/dev/null
+}
+
+seed_htoprc() {
+  mkdir -p "$STATE_DIR"
+  [[ -f "$STATE_DIR/htoprc" ]] || cp "$SEED_HTOPRC" "$STATE_DIR/htoprc"
+}
+
+client_address() {
+  hyprctl -j clients | jq -r --arg id "$APP_ID" \
+    'map(select(.class == $id or .initialClass == $id))[0].address // empty'
+}
+
+focused_monitor() {
+  hyprctl -j monitors | jq -c 'map(select(.focused))[0]'
+}
+
+spawn() {
+  seed_htoprc
+  dispatch "hl.dsp.exec_cmd(\"[float; workspace special:$WORKSPACE silent] env HTOPRC=$STATE_DIR/htoprc uwsm-app -- xdg-terminal-exec --app-id=$APP_ID -e htop\")"
+}
+
+# Places the window under the bar on whichever monitor has focus: `reserved[1]`
+# is the space the bar took, so the drop hangs off the bar's edge whatever its
+# height, and follows the bar to another monitor without a magic number.
+place() {
+  local address="$1" monitor width height x y
+  monitor="$(focused_monitor)"
+  [[ -n "$monitor" && "$monitor" != "null" ]] || return 0
+
+  width=$(jq -n --argjson m "$monitor" --argjson p "$WIDTH_PERCENT" '($m.width / $m.scale * $p / 100) | floor')
+  height=$(jq -n --argjson m "$monitor" --argjson p "$HEIGHT_PERCENT" '($m.height / $m.scale * $p / 100) | floor')
+  x=$(jq -n --argjson m "$monitor" --argjson w "$width" '($m.x + ($m.width / $m.scale - $w) / 2) | floor')
+  y=$(jq -n --argjson m "$monitor" --argjson g "$GAP" '($m.y + $m.reserved[1] + $g) | floor')
+
+  # Resize first: Hyprland recentres a floating window as it resizes, so
+  # placing before sizing would put it back where it liked.
+  dispatch "hl.dsp.window.resize({ x = $width, y = $height, relative = false, window = \"address:$address\" })"
+  dispatch "hl.dsp.window.move({ x = $x, y = $y, relative = false, window = \"address:$address\" })"
+}
+
+toggle() {
+  local address
+  address="$(client_address)"
+
+  if [[ -z "$address" ]]; then
+    spawn
+    for _ in {1..40}; do
+      address="$(client_address)"
+      [[ -n "$address" ]] && break
+      sleep 0.05
+    done
+    [[ -n "$address" ]] || { echo "htop-dropdown: the terminal never appeared" >&2; exit 1; }
+  fi
+
+  place "$address"
+  dispatch "hl.dsp.workspace.toggle_special(\"$WORKSPACE\")"
+}
+
+case "${1:-toggle}" in
+  toggle) toggle ;;
+  *) echo "usage: htop-dropdown toggle [widthPercent] [heightPercent]" >&2; exit 2 ;;
+esac
