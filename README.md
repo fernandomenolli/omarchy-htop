@@ -1,10 +1,13 @@
 # htop for Omarchy
 
-![The bar meters and the panel](preview.png)
-
 Live CPU and memory in the bar. Click it for the panel that answers what is
 eating this machine right now — and a button that opens the real htop in a
 terminal window.
+
+![The meters in the bar, and the panel that opens from them.](docs/panel.png)
+
+*The meters in the bar, and the panel that opens from them.*
+
 
 The catalogue has four native process monitors and two plugins that launch
 btop. This is the one that fronts htop, and it does not reimplement it.
@@ -34,6 +37,10 @@ The plugin writes nowhere else. Your `hyprland.conf`, `shell.json` and
 `~/.config/htop/` are never touched.
 
 ## What the clicks do
+
+![CPU and memory, left of the tray.](docs/bar.png)
+
+*CPU and memory, left of the tray.*
 
 | Click | Action |
 |-------|--------|
