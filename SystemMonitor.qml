@@ -73,7 +73,7 @@ Item {
   }
 
   onDetailedChanged: {
-    if (detailed) sample()
+    if (detailed) { sample(); primeScan.restart() }
     else {
       processes = []
       memoryHogs = []
@@ -100,6 +100,16 @@ Item {
         root.previousScanCpu = scanCpu
       }
     }
+  }
+
+  // A ranked list needs two scans to exist at all. Taking the second one
+  // early fills the panel in half a second instead of leaving it reading
+  // "Reading…" for a whole refresh interval.
+  Timer {
+    id: primeScan
+    interval: 500
+    repeat: false
+    onTriggered: if (root.detailed && !processScan.running) processScan.running = true
   }
 
   Timer {
