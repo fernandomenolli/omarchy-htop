@@ -34,28 +34,14 @@ function uptime(seconds) {
   return minutes + "m"
 }
 
-// The one-minute average as a share of the cores it has to spend it on. The
-// raw number means nothing on its own — 1.55 is an idle workstation and a
-// struggling laptop — so it is reported on the same scale as everything else
-// in the panel. It reads past 100% when more work is queued than there are
-// cores, which is exactly when it is worth reading.
-function load(averages, coreCount) {
-  if (!averages) return ""
-  if (!coreCount) return averages[0].toFixed(2)
-
-  return Math.round((averages[0] / coreCount) * 100) + "%"
-}
-
 function memoryLabel(memory) {
   if (!memory) return "--"
   return gigabytes(memory.usedKb) + " / " + gigabytes(memory.totalKb)
 }
 
-function metaLine(averages, uptimeSeconds, coreCount) {
-  var parts = []
-  if (averages) parts.push("load " + load(averages, coreCount))
-  if (uptimeSeconds !== null && uptimeSeconds !== undefined) parts.push("up " + uptime(uptimeSeconds))
-  return parts.join("   ·   ")
+function uptimeLabel(seconds) {
+  var value = uptime(seconds)
+  return value === "" ? "" : "up " + value
 }
 
 function bytes(value) {

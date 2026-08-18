@@ -84,25 +84,12 @@ function topProcesses(previous, current, totalDelta, limit) {
   return ranked.slice(0, limit)
 }
 
-function parseLoadavg(text) {
-  var fields = String(text || "").trim().split(/\s+/).slice(0, 3).map(Number)
-  if (fields.length < 3 || fields.some(isNaN)) return null
-  return fields
-}
-
 function parseUptime(text) {
   var first = String(text || "").trim().split(/\s+/)[0]
   if (first === "") return null
 
   var seconds = Number(first)
   return isNaN(seconds) ? null : seconds
-}
-
-function coreCount(text) {
-  var lines = String(text || "").split("\n").filter(function(line) {
-    return /^cpu\d+ /.test(line)
-  })
-  return lines.length > 0 ? lines.length : null
 }
 
 function topMemory(current, pageSize, limit) {

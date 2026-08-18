@@ -134,7 +134,7 @@ Panel {
             foreground: root.foreground
             fontFamily: root.fontFamily
             title: "htop"
-            meta: Format.metaLine(monitor.loadAverages, monitor.uptimeSeconds, monitor.coreCount)
+            meta: Format.uptimeLabel(monitor.uptimeSeconds)
             iconComponent: Component {
               Text {
                 text: "󰻠"

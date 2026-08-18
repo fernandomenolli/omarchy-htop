@@ -14,9 +14,7 @@ Item {
 
   property var cpuPercent: null
   property var memory: null
-  property var loadAverages: null
   property var uptimeSeconds: null
-  property var coreCount: null
   property var processes: []
   property var memoryHogs: []
 
@@ -43,7 +41,6 @@ Item {
 
   FileView { id: statFile; path: "/proc/stat"; blockLoading: true }
   FileView { id: memFile; path: "/proc/meminfo"; blockLoading: true }
-  FileView { id: loadFile; path: "/proc/loadavg"; blockLoading: true }
   FileView { id: uptimeFile; path: "/proc/uptime"; blockLoading: true }
 
   function sample() {
@@ -56,17 +53,13 @@ Item {
       previousCpu = current
     }
 
-    if (coreCount === null) coreCount = Proc.coreCount(statFile.text())
-
     memory = Proc.parseMemory(memFile.text())
 
-    // Load and uptime are only ever shown in the panel, so a closed bar reads
-    // two files a tick instead of four.
+    // Uptime is only ever shown in the panel, so a closed bar reads two files
+    // a tick instead of three.
     if (!detailed) return
 
-    loadFile.reload()
     uptimeFile.reload()
-    loadAverages = Proc.parseLoadavg(loadFile.text())
     uptimeSeconds = Proc.parseUptime(uptimeFile.text())
 
     if (!processScan.running) processScan.running = true

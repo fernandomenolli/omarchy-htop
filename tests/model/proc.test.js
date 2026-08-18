@@ -107,14 +107,6 @@ test("topProcesses skips a process that was not there last time", () => {
   eq(Proc.topProcesses(previous, current, 4000, 5), [])
 })
 
-test("parseLoadavg takes the three averages", () => {
-  eq(Proc.parseLoadavg("1.20 0.90 0.70 2/1234 56789"), [1.2, 0.9, 0.7])
-})
-
-test("parseLoadavg returns null on nonsense", () => {
-  eq(Proc.parseLoadavg("nope"), null)
-})
-
 test("parseUptime takes the seconds the machine has been up", () => {
   eq(Proc.parseUptime("345678.90 8123456.78"), 345678.9)
 })
@@ -127,15 +119,6 @@ test("parseProcesses ignores the /proc/stat header the scan carries with it", ()
   const scan = "cpu  909912 785 115028 31657426 9424 24196 14497 0 0 0\n7 12 40 bash"
   eq(Proc.parseProcesses(scan), { "7": { ticks: 12, rssPages: 40, name: "bash" } })
   eq(Proc.parseCpu(scan), { total: 32731268, idle: 31666850 })
-})
-
-test("coreCount counts the per-core lines /proc/stat carries", () => {
-  eq(Proc.coreCount(STAT), 1)
-  eq(Proc.coreCount("cpu  1 2 3 4 5\ncpu0 1\ncpu1 1\ncpu2 1\nintr 9"), 3)
-})
-
-test("coreCount returns null when there are no per-core lines", () => {
-  eq(Proc.coreCount("cpu  1 2 3 4 5\nintr 9"), null)
 })
 
 test("topMemory ranks by resident pages and needs no previous sample", () => {
