@@ -64,7 +64,17 @@ o.bind("SUPER + ESCAPE", "System monitor", "omarchy-shell io.github.fernandomeno
 
 ## Settings
 
-Under Setup > Plugins.
+Omarchy has no settings screen yet, so a setting is a key on this widget's own
+entry in the bar layout of `~/.config/omarchy/shell.json`:
+
+```json
+{
+  "id": "io.github.fernandomenolli.htop",
+  "intervalMs": 3000
+}
+```
+
+The panel has a button that opens that file in your editor.
 
 | Setting | Default | What it does |
 |---------|---------|--------------|
